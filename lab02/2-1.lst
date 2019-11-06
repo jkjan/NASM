@@ -1,0 +1,56 @@
+     1                                  %include "asm_io.inc"
+     2                              <1> 	extern  read_int, print_int, print_string
+     3                              <1> 	extern	read_char, print_char, print_nl
+     4                              <1> 	extern  sub_dump_regs, sub_dump_mem, sub_dump_math, sub_dump_stack
+     5                              <1> 
+     6                              <1> %macro 	dump_regs 1
+     7                              <1> 	push	  dword %1
+     8                              <1> 	call	  sub_dump_regs
+     9                              <1> %endmacro
+    10                              <1> 
+    11                              <1> 
+    12                              <1> ;
+    13                              <1> ; usage: dump_mem label, start-address, # paragraphs
+    14                              <1> %macro  dump_mem 3
+    15                              <1> 	push	 dword %1
+    16                              <1> 	push	 dword %2
+    17                              <1> 	push	 dword %3
+    18                              <1> 	call	 sub_dump_mem
+    19                              <1> %endmacro
+    20                              <1> 
+    21                              <1> %macro	dump_math 1
+    22                              <1> 	push	 dword %1
+    23                              <1> 	call	 sub_dump_math
+    24                              <1> %endmacro
+    25                              <1> 
+    26                              <1> %macro  dump_stack 3
+    27                              <1> 	push	 dword %3
+    28                              <1>         push     dword %2
+    29                              <1> 	push	 dword %1
+    30                              <1>         call     sub_dump_stack
+    31                              <1> %endmacro
+    32                                  
+    33                                  	segment	.data
+    34                                  	;
+    35                                  	; initialized data is put in the data segment here
+    36                                  	;
+    37 00000000 49206C6F766520796F-     out_string	db "I love you, Prof.Son!", 0x0a, 0x00
+    38 00000009 752C2050726F662E53-
+    39 00000012 6F6E210A00         
+    40                                  
+    41                                  	segment	.text
+    42                                  	global 	main
+    43                                  main
+    44 00000000 C8000000                	enter	0,0		; setup stack frame
+    45 00000004 60                      	pusha
+    46 00000005 B8[00000000]            	mov eax, out_string
+    47 0000000A E8(00000000)            	call	print_string
+    48                                  	;
+    49                                  	; code is put in the text segment. Do not modify the code before
+    50                                  	; or after this comment.
+    51                                  	;
+    52                                  
+    53 0000000F 61                      	popa
+    54 00000010 B800000000              	mov	eax, 0	; return value
+    55 00000015 C9                      	leave			; leave stack frame
+    56 00000016 C3                      	ret

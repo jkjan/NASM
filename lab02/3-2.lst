@@ -1,0 +1,78 @@
+     1                                  %include "asm_io.inc"
+     2                              <1> 	extern  read_int, print_int, print_string
+     3                              <1> 	extern	read_char, print_char, print_nl
+     4                              <1> 	extern  sub_dump_regs, sub_dump_mem, sub_dump_math, sub_dump_stack
+     5                              <1> 
+     6                              <1> %macro 	dump_regs 1
+     7                              <1> 	push	  dword %1
+     8                              <1> 	call	  sub_dump_regs
+     9                              <1> %endmacro
+    10                              <1> 
+    11                              <1> 
+    12                              <1> ;
+    13                              <1> ; usage: dump_mem label, start-address, # paragraphs
+    14                              <1> %macro  dump_mem 3
+    15                              <1> 	push	 dword %1
+    16                              <1> 	push	 dword %2
+    17                              <1> 	push	 dword %3
+    18                              <1> 	call	 sub_dump_mem
+    19                              <1> %endmacro
+    20                              <1> 
+    21                              <1> %macro	dump_math 1
+    22                              <1> 	push	 dword %1
+    23                              <1> 	call	 sub_dump_math
+    24                              <1> %endmacro
+    25                              <1> 
+    26                              <1> %macro  dump_stack 3
+    27                              <1> 	push	 dword %3
+    28                              <1>         push     dword %2
+    29                              <1> 	push	 dword %1
+    30                              <1>         call     sub_dump_stack
+    31                              <1> %endmacro
+    32                                  
+    33                                  	segment	.data
+    34                                  	;
+    35                                  	; initialized data is put in the data segment here
+    36                                  	;
+    37 00000000 456E7465722061206E-     num_a	db 'Enter a number (A) : ', 0x00
+    38 00000009 756D62657220284129-
+    39 00000012 203A2000           
+    40 00000016 456E7465722061206E-     num_b	db 'Enter a number (B) : ', 0x00
+    41 0000001F 756D62657220284229-
+    42 00000028 203A2000           
+    43 0000002C 41202B2042203D2000      result_plus	db 'A + B = ', 0x00
+    44 00000035 41202D2042203D2000      result_minus	db 'A - B = ', 0x00
+    45                                  	segment	.text
+    46                                  	global 	main
+    47                                  main
+    48 00000000 C8000000                	enter	0,0		; setup stack frame
+    49 00000004 60                      	pusha
+    50 00000005 B8[00000000]            	mov eax, num_a
+    51 0000000A E8(00000000)            	call	print_string
+    52 0000000F E8(00000000)            	call	read_int
+    53 00000014 89C1                    	mov ecx, eax
+    54 00000016 B8[16000000]            	mov eax, num_b
+    55 0000001B E8(00000000)            	call	print_string
+    56 00000020 E8(00000000)            	call	read_int
+    57 00000025 89C2                    	mov edx, eax
+    58 00000027 B8[2C000000]            	mov eax, result_plus
+    59 0000002C E8(00000000)            	call	print_string
+    60 00000031 89C8                    	mov eax, ecx
+    61 00000033 11D0                    	adc eax, edx
+    62 00000035 E8(00000000)            	call	print_int
+    63 0000003A E8(00000000)            	call	print_nl
+    64 0000003F B8[35000000]            	mov eax, result_minus
+    65 00000044 E8(00000000)            	call	print_string
+    66 00000049 89C8                    	mov eax, ecx
+    67 0000004B 19D0                    	sbb eax, edx
+    68 0000004D E8(00000000)            	call	print_int
+    69 00000052 E8(00000000)            	call	print_nl
+    70                                  	;
+    71                                  	; code is put in the text segment. Do not modify the code before
+    72                                  	; or after this comment.
+    73                                  	;
+    74                                  
+    75 00000057 61                      	popa
+    76 00000058 B800000000              	mov	eax, 0	; return value
+    77 0000005D C9                      	leave			; leave stack frame
+    78 0000005E C3                      	ret
